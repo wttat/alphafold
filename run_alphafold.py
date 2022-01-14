@@ -116,6 +116,7 @@ flags.DEFINE_integer('random_seed', None, 'The random seed for the data '
 flags.DEFINE_boolean('use_precomputed_msas', False, 'Whether to read MSAs that '
                      'have been written to disk. WARNING: This will not check '
                      'if the sequence, database or configuration have changed.')
+flags.DEFINE_integer('vcpu', 8, 'vcpu from batch setting')
 
 FLAGS = flags.FLAGS
 
@@ -364,7 +365,10 @@ def main(argv):
         monomer_data_pipeline=monomer_data_pipeline,
         jackhmmer_binary_path=FLAGS.jackhmmer_binary_path,
         uniprot_database_path=FLAGS.uniprot_database_path,
-        use_precomputed_msas=FLAGS.use_precomputed_msas)
+        use_precomputed_msas=FLAGS.use_precomputed_msas,
+        # add vcpu
+        vcpu=FLAGS.vcpu
+        )
   else:
     data_pipeline = monomer_data_pipeline
 
@@ -422,6 +426,7 @@ if __name__ == '__main__':
       'template_mmcif_dir',
       'max_template_date',
       'obsolete_pdbs_path',
+      'vcpu',
   ])
 
   app.run(main)

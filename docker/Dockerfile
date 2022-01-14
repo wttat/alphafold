@@ -63,7 +63,10 @@ RUN wget -q -P /app/alphafold/alphafold/common/ \
   https://git.scicore.unibas.ch/schwede/openstructure/-/raw/7102c63615b64735c4941278d92b554ec94415f8/modules/mol/alg/src/stereo_chemical_props.txt
 
 # Install pip packages.
+# add boto3 & awscli
 RUN pip3 install --upgrade pip \
+    && pip3 install boto3 \
+    && pip3 install awscli \ 
     && pip3 install -r /app/alphafold/requirements.txt \
     && pip3 install --upgrade jax jaxlib==0.1.69+cuda${CUDA/./} -f \
       https://storage.googleapis.com/jax-releases/jax_releases.html
@@ -78,8 +81,11 @@ RUN patch -p0 < /app/alphafold/docker/openmm.patch
 # ENTRYPOINT does not support easily running multiple commands, so instead we
 # write a shell script to wrap them up.
 WORKDIR /app/alphafold
-RUN echo $'#!/bin/bash\n\
-ldconfig\n\
-python /app/alphafold/run_alphafold.py "$@"' > /app/run_alphafold.sh \
-  && chmod +x /app/run_alphafold.sh
-ENTRYPOINT ["/app/run_alphafold.sh"]
+# RUN echo $'#!/bin/bash\n\
+# ldconfig\n\
+# python /app/alphafold/run_alphafold.py "$@"' > /app/run_alphafold.sh \
+#   && chmod +x /app/run_alphafold.sh
+# ENTRYPOINT ["/app/run_alphafold.sh"]
+
+COPY run.sh /app/run.sh
+RUN chmod +x /app/run.sh
