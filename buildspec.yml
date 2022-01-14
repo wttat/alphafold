@@ -4,21 +4,20 @@ environment_variables:
   plaintext:
     accountid: "475089398927"
     region: "us-east-1"
-    repo_name: "ec2vpccdkstack-repobc133953-zc2xncuw663w"
-    repo_uri: "${accountid}.dkr.ecr.${region}.amazonaws.com"
+    repo: "ec2vpccdkstack-repobc133953-zc2xncuw663w"
     version: "dev"
     
 phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - $(aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${repo_uri})
+      - $(aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${accountid}.dkr.ecr.${region}.amazonaws.com)
   build:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...          
-      - docker build -f docker/Dockerfile -t ${repo_name} .
-      - docker tag ${repo_name}:${version} ${repo_uri}/${repo_name}:${version}
+      - docker build -f docker/Dockerfile -t ${repo} .
+      - docker tag ${repo}:${version} ${accountid}.dkr.ecr.${region}.amazonaws.com/${repo}:${version}
   post_build:
     commands:
       - echo Build completed on `date`
