@@ -5,14 +5,14 @@ environment_variables:
     accountid: "475089398927"
     region: "us-east-1"
     repo_name: "ec2vpccdkstack-repobc133953-zc2xncuw663w"
-    repo_uri: "${accountid}.dkr.ecr.${region}.amazonaws.com/"
+    repo_uri: "${accountid}.dkr.ecr.${region}.amazonaws.com"
     version: "dev"
     
 phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - $(aws ecr get-login --no-include-email)
+      - $(aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${repo_uri})
   build:
     commands:
       - echo Build started on `date`
