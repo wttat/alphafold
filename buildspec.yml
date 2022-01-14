@@ -22,4 +22,4 @@ phases:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
-      - docker push ${repo}${username}/index:${version}
+      - docker push ${accountid}.dkr.ecr.${region}.amazonaws.com/${repo}:${version}
