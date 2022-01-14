@@ -10,8 +10,8 @@ environment_variables:
 phases:
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
-      - $(aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${accountid}.dkr.ecr.${region}.amazonaws.com)
+      - echo Logging in to Amazon ECR..
+      - aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${accountid}.dkr.ecr.${region}.amazonaws.com
   build:
     commands:
       - echo Build started on `date`
