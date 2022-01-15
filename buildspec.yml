@@ -1,25 +1,18 @@
 version: 0.2
 
-environment_variables:
-  plaintext:
-    accountid: "475089398927"
-    region: "us-east-1"
-    repo: "ec2vpccdkstack-repobc133953-zc2xncuw663w"
-    version: "dev"
-    
 phases:
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR..
-      - aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${accountid}.dkr.ecr.${region}.amazonaws.com
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
   build:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...          
-      - docker build -f docker/Dockerfile -t ${repo} .
-      - docker tag ${repo}:${version} ${accountid}.dkr.ecr.${region}.amazonaws.com/${repo}:${version}
+      - docker build -f docker/Dockerfile -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG      
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
-      - docker push ${accountid}.dkr.ecr.${region}.amazonaws.com/${repo}:${version}
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
