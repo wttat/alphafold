@@ -13,7 +13,7 @@ usage() {
         echo "Optional Parameters:"
         echo "-m <model_preset>     Choose preset model configuration - the monomer model, the monomer model with extra ensembling, monomer model with pTM head, or multimer model (default: 'monomer')"
         echo "-c <db_preset>        Choose preset MSA database configuration - smaller genetic database config (reduced_dbs) or full genetic database config (full_dbs) (default: 'full_dbs')"
-        echo "-l <is_prokaryote>    Optional for multimer system, not used by the single chain system. A boolean specifying true where the target complex is from a prokaryote, and false where it is not, or where the origin is unknown. This value determine the pairing method for the MSA (default: 'None')"
+        echo "-l <is_prokaryote_list>    Optional for multimer system, not used by the single chain system. A boolean specifying true where the target complex is from a prokaryote, and false where it is not, or where the origin is unknown. This value determine the pairing method for the MSA (default: 'None')"
         echo "-p <use_precomputed_msas> Whether to read MSAs that have been written to disk. WARNING: This will not check if the sequence, database or configuration have changed (default: 'false')"
         echo "-b <benchmark>        Run multiple JAX model evaluations to obtain a timing that excludes the compilation time, which should be more indicative of the time required for inferencing many proteins (default: 'false')"
         echo ""
@@ -35,7 +35,7 @@ while getopts ":f:t:m:c:l:p" i; do
                 db_preset=$OPTARG
         ;;
         l)
-                is_prokaryote=$OPTARG
+                is_prokaryote_list=$OPTARG
         ;;
         p)
                 use_precomputed_msas=$OPTARG
@@ -49,7 +49,7 @@ echo "fasta_paths : $fasta_paths"
 echo "max_template_date : $max_template_date"
 echo "model_preset : $model_preset"
 echo "db_preset : $db_preset"
-echo "is_prokaryote : $is_prokaryote"
+echo "is_prokaryote_list : $is_prokaryote_list"
 
 pwd
 
@@ -80,18 +80,18 @@ if [[ "$use_precomputed_msas" == "" ]] ; then
     use_precomputed_msas="false"
 fi
 
-if [[ "$is_prokaryote" == "" ]] ; then
-    is_prokaryote="false"
+if [[ "$is_prokaryote_list" == "" ]] ; then
+    is_prokaryote_list="false"
 fi
 
-if [[ "$is_prokaryote" != "true" && "$is_prokaryote" != "false" ]] ; then
-    echo "Unknown is_prokaryote preset! Using default ('false')"
-    is_prokaryote="false"
+if [[ "$is_prokaryote_list" != "true" && "$is_prokaryote_list" != "false" ]] ; then
+    echo "Unknown is_prokaryote_list preset! Using default ('false')"
+    is_prokaryote_list="false"
 fi
 
 echo "model_preset reset: $model_preset"
 echo "db_preset reset: $db_preset"
-echo "is_prokaryote reset: $is_prokaryote"
+echo "is_prokaryote_list reset: $is_prokaryote_list"
 
 # This bash script looks for the run_alphafold.py script in its current working directory, if it does not exist then exits
 current_working_dir=$(pwd)
@@ -171,9 +171,11 @@ else
 	database_paths="$database_paths --uniclust30_database_path=$uniclust30_database_path --bfd_database_path=$bfd_database_path"
 fi
 
-if [[ $is_prokaryote ]]; then
-	command_args="$command_args --is_prokaryote_list=$is_prokaryote"
+if [[ $is_prokaryote_list ]]; then
+	command_args="$command_args --is_prokaryote_list=$is_prokaryote_list"
 fi
+
+echo "command_args: $command_args"
 
 # get vCPU
 vcpu=$[$(curl -s $ECS_CONTAINER_METADATA_URI | jq '.Limits.CPU')/1024]
