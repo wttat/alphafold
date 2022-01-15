@@ -149,7 +149,7 @@ obsolete_pdbs_path="$data_dir/pdb_mmcif/obsolete.dat"
 
 # download fasta file from S3
 echo "start downloading"
-aws s3 cp s3://$BATCH_BUCKET/$BATCH_DIR_PREFIX/$fasta_paths ./ --region $REGION
+aws s3 cp s3://$BATCH_BUCKET/$INPUT_PREFIX/$fasta_paths ./ --region $REGION
 
 output_dir="/app/output/"
 
