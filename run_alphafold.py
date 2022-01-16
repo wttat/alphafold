@@ -358,7 +358,7 @@ def main(argv):
       template_searcher=template_searcher,
       template_featurizer=template_featurizer,
       use_small_bfd=use_small_bfd,
-      use_precomputed_msas=FLAGS.use_precomputed_msas
+      use_precomputed_msas=FLAGS.use_precomputed_msas,
       # add vcpu
       vcpu=FLAGS.vcpu
       )

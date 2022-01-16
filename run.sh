@@ -156,7 +156,11 @@ aws s3 cp s3://$BATCH_BUCKET/$INPUT_PREFIX/$fasta_paths ./ --region $REGION
 
 output_dir="/app/output/"
 
-command_args="--fasta_paths=$fasta_paths --output_dir=$output_dir --benchmark=$benchmark --max_template_date=$max_template_date --db_preset=$db_preset --model_preset=$model_preset --benchmark=$benchmark --use_precomputed_msas=$use_precomputed_msas --logtostderr"
+# get vCPU
+vcpu=$[$(curl -s $ECS_CONTAINER_METADATA_URI | jq '.Limits.CPU')/1024]
+echo "get vCPU : $vcpu"
+
+command_args="--vcpu=$vcpu --fasta_paths=$fasta_paths --output_dir=$output_dir --benchmark=$benchmark --max_template_date=$max_template_date --db_preset=$db_preset --model_preset=$model_preset --benchmark=$benchmark --use_precomputed_msas=$use_precomputed_msas --logtostderr"
 
 database_paths="--uniref90_database_path=$uniref90_database_path --mgnify_database_path=$mgnify_database_path --data_dir=$data_dir --template_mmcif_dir=$template_mmcif_dir --obsolete_pdbs_path=$obsolete_pdbs_path"
 
@@ -182,14 +186,10 @@ echo "command_args: $command_args"
 echo "database_paths: $database_paths"
 echo "binary_paths: $binary_paths"
 
-# get vCPU
-vcpu=$[$(curl -s $ECS_CONTAINER_METADATA_URI | jq '.Limits.CPU')/1024]
-echo "get vCPU : $vcpu"
-
 # Run AlphaFold with required parameters
 echo "start running af2"
 # $(python $alphafold_script $binary_paths $database_paths $command_args)
-$(python $alphafold_script --vcpu=$vcpu $binary_paths $database_paths $command_args)
+$(python $alphafold_script $binary_paths $database_paths $command_args)
 
 echo "start ziping"
 fasta_name=${fasta_paths%.*}
