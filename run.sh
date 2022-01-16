@@ -20,7 +20,7 @@ usage() {
         exit 1
 }
 
-while getopts ":f:t:m:c:l:p" i; do
+while getopts ":f:t:m:c:l:p:b" i; do
         case "${i}" in
         f)
                 fasta_paths=$OPTARG
@@ -39,6 +39,9 @@ while getopts ":f:t:m:c:l:p" i; do
         ;;
         p)
                 use_precomputed_msas=$OPTARG
+        ;;
+        b)
+                benchmark=false
         ;;
         esac
 done
@@ -153,7 +156,7 @@ aws s3 cp s3://$BATCH_BUCKET/$INPUT_PREFIX/$fasta_paths ./ --region $REGION
 
 output_dir="/app/output/"
 
-command_args="--fasta_paths=$fasta_paths --output_dir=$output_dir --max_template_date=$max_template_date --db_preset=$db_preset --model_preset=$model_preset --benchmark=$benchmark --use_precomputed_msas=$use_precomputed_msas --logtostderr"
+command_args="--fasta_paths=$fasta_paths --output_dir=$output_dir --benchmark=$benchmark --max_template_date=$max_template_date --db_preset=$db_preset --model_preset=$model_preset --benchmark=$benchmark --use_precomputed_msas=$use_precomputed_msas --logtostderr"
 
 database_paths="--uniref90_database_path=$uniref90_database_path --mgnify_database_path=$mgnify_database_path --data_dir=$data_dir --template_mmcif_dir=$template_mmcif_dir --obsolete_pdbs_path=$obsolete_pdbs_path"
 
