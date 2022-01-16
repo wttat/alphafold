@@ -41,7 +41,7 @@ while getopts ":f:t:m:c:l:p:b" i; do
                 use_precomputed_msas=$OPTARG
         ;;
         b)
-                benchmark=false
+                benchmark='false'
         ;;
         esac
 done
