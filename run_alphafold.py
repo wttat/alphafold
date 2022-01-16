@@ -358,7 +358,10 @@ def main(argv):
       template_searcher=template_searcher,
       template_featurizer=template_featurizer,
       use_small_bfd=use_small_bfd,
-      use_precomputed_msas=FLAGS.use_precomputed_msas)
+      use_precomputed_msas=FLAGS.use_precomputed_msas
+      # add vcpu
+      vcpu=FLAGS.vcpu
+      )
 
   if run_multimer_system:
     data_pipeline = pipeline_multimer.DataPipeline(
@@ -366,8 +369,6 @@ def main(argv):
         jackhmmer_binary_path=FLAGS.jackhmmer_binary_path,
         uniprot_database_path=FLAGS.uniprot_database_path,
         use_precomputed_msas=FLAGS.use_precomputed_msas,
-        # add vcpu
-        vcpu=FLAGS.vcpu
         )
   else:
     data_pipeline = monomer_data_pipeline
