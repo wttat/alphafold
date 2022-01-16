@@ -145,10 +145,10 @@ template_mmcif_dir="$data_dir/pdb_mmcif/mmcif_files"
 obsolete_pdbs_path="$data_dir/pdb_mmcif/obsolete.dat"
 
 # Binary path (change me if required)
-# hhblits_binary_path=$(which hhblits)
-# hhsearch_binary_path=$(which hhsearch)
-# jackhmmer_binary_path=$(which jackhmmer)
-# kalign_binary_path=$(which kalign)
+hhblits_binary_path=$(which hhblits)
+hhsearch_binary_path=$(which hhsearch)
+jackhmmer_binary_path=$(which jackhmmer)
+kalign_binary_path=$(which kalign)
 
 # download fasta file from S3
 echo "start downloading"
@@ -179,6 +179,8 @@ if [[ $is_prokaryote_list ]]; then
 fi
 
 echo "command_args: $command_args"
+echo "database_paths: $database_paths"
+echo "binary_paths: $binary_paths"
 
 # get vCPU
 vcpu=$[$(curl -s $ECS_CONTAINER_METADATA_URI | jq '.Limits.CPU')/1024]
