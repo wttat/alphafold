@@ -30,6 +30,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
       kalign \
       tzdata \
       wget \
+      jq\
+      curl\
     && rm -rf /var/lib/apt/lists/*
 
 # Compile HHsuite from source.
@@ -68,7 +70,7 @@ RUN pip3 install --upgrade pip \
     && pip3 install boto3 \
     && pip3 install awscli \ 
     && pip3 install -r /app/alphafold/requirements.txt \
-    && pip3 install --upgrade jax jaxlib==0.1.69+cuda${CUDA/./} -f \
+    && pip3 install --upgrade jaxlib==0.1.69+cuda${CUDA/./} -f \
       https://storage.googleapis.com/jax-releases/jax_releases.html
 
 # Apply OpenMM patch.
