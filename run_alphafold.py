@@ -116,7 +116,7 @@ flags.DEFINE_integer('random_seed', None, 'The random seed for the data '
 flags.DEFINE_boolean('use_precomputed_msas', False, 'Whether to read MSAs that '
                      'have been written to disk. WARNING: This will not check '
                      'if the sequence, database or configuration have changed.')
-flags.DEFINE_integer('vcpu', 8, 'vcpu from batch setting')
+flags.DEFINE_integer('vcpu', None, 'vcpu from batch setting')
 
 FLAGS = flags.FLAGS
 
