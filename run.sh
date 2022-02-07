@@ -57,6 +57,7 @@ echo "max_template_date : $max_template_date"
 echo "model_preset : $model_preset"
 echo "db_preset : $db_preset"
 echo "is_prokaryote_list : $is_prokaryote_list"
+echo "run_relax: $run_relax"
 
 pwd
 
@@ -96,9 +97,20 @@ if [[ "$is_prokaryote_list" != "true" && "$is_prokaryote_list" != "false" ]] ; t
     is_prokaryote_list="false"
 fi
 
+if [[ "$run_relax" == "" ]] ; then
+    run_relax="true"
+fi
+
+if [[ "$run_relax" != "true" && "$run_relax" != "false" ]] ; then
+    echo "Unknown run_relax preset! Using default ('true')"
+    is_prokaryote_list="true"
+fi
+
 echo "model_preset reset: $model_preset"
 echo "db_preset reset: $db_preset"
 echo "is_prokaryote_list reset: $is_prokaryote_list"
+echo "run_relax: $run_relax"
+
 
 # This bash script looks for the run_alphafold.py script in its current working directory, if it does not exist then exits
 current_working_dir=$(pwd)
