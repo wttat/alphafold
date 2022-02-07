@@ -15,12 +15,13 @@ usage() {
         echo "-c <db_preset>        Choose preset MSA database configuration - smaller genetic database config (reduced_dbs) or full genetic database config (full_dbs) (default: 'full_dbs')"
         echo "-l <is_prokaryote_list>    Optional for multimer system, not used by the single chain system. A boolean specifying true where the target complex is from a prokaryote, and false where it is not, or where the origin is unknown. This value determine the pairing method for the MSA (default: 'None')"
         echo "-p <use_precomputed_msas> Whether to read MSAs that have been written to disk. WARNING: This will not check if the sequence, database or configuration have changed (default: 'false')"
+        echo "-r <run_relax> Whether to run the final relaxation step on the predicted models. Turning relax off might result in predictions with distracting stereochemical violations but might help in case you are having issues with the relaxation stage."
         echo "-b <benchmark>        Run multiple JAX model evaluations to obtain a timing that excludes the compilation time, which should be more indicative of the time required for inferencing many proteins (default: 'false')"
         echo ""
         exit 1
 }
 
-while getopts ":f:t:m:c:l:p:b" i; do
+while getopts ":f:t:m:c:l:p:r:b" i; do
         case "${i}" in
         f)
                 fasta_paths=$OPTARG
@@ -39,6 +40,9 @@ while getopts ":f:t:m:c:l:p:b" i; do
         ;;
         p)
                 use_precomputed_msas=$OPTARG
+        ;;
+        r)
+                run_relax=$OPTARG
         ;;
         b)
                 benchmark='false'
@@ -160,7 +164,9 @@ output_dir="/app/output/"
 vcpu=$[$(curl -s $ECS_CONTAINER_METADATA_URI | jq '.Limits.CPU')/1024]
 echo "get vCPU : $vcpu"
 
-command_args="--vcpu=$vcpu --fasta_paths=$fasta_paths --output_dir=$output_dir --benchmark=$benchmark --max_template_date=$max_template_date --db_preset=$db_preset --model_preset=$model_preset --use_precomputed_msas=$use_precomputed_msas --logtostderr"
+use_gpu_relax='true'
+
+command_args="--run_relax=$run_relax --use_gpu_relax=$use_gpu_relax --vcpu=$vcpu --fasta_paths=$fasta_paths --output_dir=$output_dir --benchmark=$benchmark --max_template_date=$max_template_date --db_preset=$db_preset --model_preset=$model_preset --use_precomputed_msas=$use_precomputed_msas --logtostderr"
 
 database_paths="--uniref90_database_path=$uniref90_database_path --mgnify_database_path=$mgnify_database_path --data_dir=$data_dir --template_mmcif_dir=$template_mmcif_dir --obsolete_pdbs_path=$obsolete_pdbs_path"
 
