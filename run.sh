@@ -13,7 +13,7 @@ usage() {
         echo "Optional Parameters:"
         echo "-m <model_preset>     Choose preset model configuration - the monomer model, the monomer model with extra ensembling, monomer model with pTM head, or multimer model (default: 'monomer')"
         echo "-c <db_preset>        Choose preset MSA database configuration - smaller genetic database config (reduced_dbs) or full genetic database config (full_dbs) (default: 'full_dbs')"
-        echo "-l <is_prokaryote_list>    Optional for multimer system, not used by the single chain system. A boolean specifying true where the target complex is from a prokaryote, and false where it is not, or where the origin is unknown. This value determine the pairing method for the MSA (default: 'None')"
+        echo "-l <num_multimer_predictions_per_model> How many predictions (each with a different random seed) will be generated per model. E.g. if this is 2 and there are 5 models then there will be 10 predictions per input. Note: this FLAG only applies if model_preset=multimer (default: 5)"
         echo "-p <use_precomputed_msas> Whether to read MSAs that have been written to disk. WARNING: This will not check if the sequence, database or configuration have changed (default: 'false')"
         echo "-r <run_relax> Whether to run the final relaxation step on the predicted models. Turning relax off might result in predictions with distracting stereochemical violations but might help in case you are having issues with the relaxation stage."
         echo "-b <benchmark>        Run multiple JAX model evaluations to obtain a timing that excludes the compilation time, which should be more indicative of the time required for inferencing many proteins (default: 'false')"
@@ -36,7 +36,7 @@ while getopts ":f:t:m:c:l:p:r:b" i; do
                 db_preset=$OPTARG
         ;;
         l)
-                is_prokaryote_list=$OPTARG
+                num_multimer_predictions_per_model=$OPTARG
         ;;
         p)
                 use_precomputed_msas=$OPTARG
@@ -56,7 +56,7 @@ echo "fasta_paths : $fasta_paths"
 echo "max_template_date : $max_template_date"
 echo "model_preset : $model_preset"
 echo "db_preset : $db_preset"
-echo "is_prokaryote_list : $is_prokaryote_list"
+echo "num_multimer_predictions_per_model : $num_multimer_predictions_per_model"
 echo "run_relax: $run_relax"
 
 pwd
@@ -64,6 +64,14 @@ pwd
 # Parse input and set defaults
 if [[ "$fasta_paths" == "" || "$max_template_date" == "" ]] ; then
     usage
+fi
+
+if [[ "$run_relax" == "" ]] ; then
+    run_relax="true"
+fi
+
+if [[ "$num_multimer_predictions_per_model" == "" ]] ; then
+    num_multimer_predictions_per_model=5
 fi
 
 if [[ "$model_preset" == "" ]] ; then
@@ -88,27 +96,9 @@ if [[ "$use_precomputed_msas" == "" ]] ; then
     use_precomputed_msas="false"
 fi
 
-if [[ "$is_prokaryote_list" == "" ]] ; then
-    is_prokaryote_list="false"
-fi
-
-if [[ "$is_prokaryote_list" != "true" && "$is_prokaryote_list" != "false" ]] ; then
-    echo "Unknown is_prokaryote_list preset! Using default ('false')"
-    is_prokaryote_list="false"
-fi
-
-if [[ "$run_relax" == "" ]] ; then
-    run_relax="true"
-fi
-
-if [[ "$run_relax" != "true" && "$run_relax" != "false" ]] ; then
-    echo "Unknown run_relax preset! Using default ('true')"
-    is_prokaryote_list="true"
-fi
-
 echo "model_preset reset: $model_preset"
 echo "db_preset reset: $db_preset"
-echo "is_prokaryote_list reset: $is_prokaryote_list"
+echo "num_multimer_predictions_per_model reset: $num_multimer_predictions_per_model"
 echo "run_relax: $run_relax"
 
 
@@ -178,7 +168,7 @@ echo "get vCPU : $vcpu"
 
 use_gpu_relax='true'
 
-command_args="--run_relax=$run_relax --use_gpu_relax=$use_gpu_relax --vcpu=$vcpu --fasta_paths=$fasta_paths --output_dir=$output_dir --benchmark=$benchmark --max_template_date=$max_template_date --db_preset=$db_preset --model_preset=$model_preset --use_precomputed_msas=$use_precomputed_msas --logtostderr"
+command_args="--fasta_paths=$fasta_paths --output_dir=$output_dir --max_template_date=$max_template_date --db_preset=$db_preset --model_preset=$model_preset --benchmark=$benchmark --use_precomputed_msas=$use_precomputed_msas --num_multimer_predictions_per_model=$num_multimer_predictions_per_model --run_relax=$run_relax --use_gpu_relax=$use_gpu_relax --logtostderr"
 
 database_paths="--uniref90_database_path=$uniref90_database_path --mgnify_database_path=$mgnify_database_path --data_dir=$data_dir --template_mmcif_dir=$template_mmcif_dir --obsolete_pdbs_path=$obsolete_pdbs_path"
 
@@ -194,10 +184,6 @@ if [[ "$db_preset" == "reduced_dbs" ]]; then
 	database_paths="$database_paths --small_bfd_database_path=$small_bfd_database_path"
 else
 	database_paths="$database_paths --uniclust30_database_path=$uniclust30_database_path --bfd_database_path=$bfd_database_path"
-fi
-
-if [[ $is_prokaryote_list ]]; then
-	command_args="$command_args --is_prokaryote_list=$is_prokaryote_list"
 fi
 
 echo "command_args: $command_args"

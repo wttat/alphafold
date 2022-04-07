@@ -425,7 +425,6 @@ if __name__ == '__main__':
       'obsolete_pdbs_path',
       'use_gpu_relax',
       'vcpu',
-
   ])
 
   app.run(main)
