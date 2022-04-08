@@ -129,7 +129,7 @@ flags.DEFINE_boolean('use_gpu_relax', None, 'Whether to relax on GPU. '
                      'recommended to enable if possible. GPUs must be available'
                      ' if this setting is enabled.')
 
-flags.DEFINE_integer('vcpu', None, 'vcpu from batch setting')
+flags.DEFINE_integer('vcpu', 8, 'vcpu from batch setting')
 
 
 FLAGS = flags.FLAGS
