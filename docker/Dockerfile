@@ -30,6 +30,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
         kalign \
         tzdata \
         wget \
+        jq \
+        curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Compile HHsuite from source.
@@ -64,6 +66,8 @@ RUN wget -q -P /app/alphafold/alphafold/common/ \
 
 # Install pip packages.
 RUN pip3 install --upgrade pip \
+    && pip3 install boto3 \
+    && pip3 install awscli \
     && pip3 install -r /app/alphafold/requirements.txt \
     && pip3 install --upgrade \
       jax==0.2.14 \
