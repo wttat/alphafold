@@ -194,8 +194,14 @@ echo "binary_paths: $binary_paths"
 
 # Run AlphaFold with required parameters
 echo "start running af2"
-# $(python $alphafold_script $binary_paths $database_paths $command_args)
 $(python $alphafold_script $binary_paths $database_paths $command_args)
+
+if [ $? -ne 0];then
+        echo "af2 failed"
+        exit N
+else
+        echo "af2 succeed"
+fi
 
 echo "start ziping"
 fasta_name=${fasta_paths%.*}
