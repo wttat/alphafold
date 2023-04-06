@@ -74,6 +74,9 @@ RUN pip3 install --upgrade pip --no-cache-dir \
       jaxlib==0.3.25+cuda11.cudnn805 \
       -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
+# Install awscli & boto3.
+RUN pip3 install awscli boto3 --no-cache-dir
+
 # Apply OpenMM patch.
 WORKDIR /opt/conda/lib/python3.8/site-packages
 RUN patch -p0 < /app/alphafold/docker/openmm.patch
