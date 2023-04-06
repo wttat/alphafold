@@ -13,6 +13,7 @@
 # limitations under the License.
 
 """Helper methods for the AlphaFold Colab notebook."""
+import enum
 import json
 from typing import Any, Mapping, Optional, Sequence, Tuple
 
@@ -22,7 +23,13 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 
-def clean_and_validate_single_sequence(
+@enum.unique
+class ModelType(enum.Enum):
+  MONOMER = 0
+  MULTIMER = 1
+
+
+def clean_and_validate_sequence(
     input_sequence: str, min_length: int, max_length: int) -> str:
   """Checks that the input sequence is ok and returns a clean version of it."""
   # Remove all whitespaces, tabs and end lines; upper-case.
@@ -47,23 +54,41 @@ def clean_and_validate_single_sequence(
   return clean_sequence
 
 
-def clean_and_validate_input_sequences(
+def validate_input(
     input_sequences: Sequence[str],
-    min_sequence_length: int,
-    max_sequence_length: int) -> Sequence[str]:
-  """Validates and cleans input sequences."""
+    min_length: int,
+    max_length: int,
+    max_multimer_length: int) -> Tuple[Sequence[str], ModelType]:
+  """Validates and cleans input sequences and determines which model to use."""
   sequences = []
 
   for input_sequence in input_sequences:
     if input_sequence.strip():
-      input_sequence = clean_and_validate_single_sequence(
+      input_sequence = clean_and_validate_sequence(
           input_sequence=input_sequence,
-          min_length=min_sequence_length,
-          max_length=max_sequence_length)
+          min_length=min_length,
+          max_length=max_length)
       sequences.append(input_sequence)
 
-  if sequences:
-    return sequences
+  if len(sequences) == 1:
+    print('Using the single-chain model.')
+    return sequences, ModelType.MONOMER
+
+  elif len(sequences) > 1:
+    total_multimer_length = sum([len(seq) for seq in sequences])
+    if total_multimer_length > max_multimer_length:
+      raise ValueError(f'The total length of multimer sequences is too long: '
+                       f'{total_multimer_length}, while the maximum is '
+                       f'{max_multimer_length}. Please use the full AlphaFold '
+                       f'system for long multimers.')
+    elif total_multimer_length > 1536:
+      print('WARNING: The accuracy of the system has not been fully validated '
+            'above 1536 residues, and you may experience long running times or '
+            f'run out of memory for your complex with {total_multimer_length} '
+            'residues.')
+    print(f'Using the multimer model with {len(sequences)} sequences.')
+    return sequences, ModelType.MULTIMER
+
   else:
     raise ValueError('No input amino acid sequence provided, please provide at '
                      'least one sequence.')
@@ -144,25 +169,14 @@ def empty_placeholder_template_features(
 
 
 def get_pae_json(pae: np.ndarray, max_pae: float) -> str:
-  """Returns the PAE in the same format as is used in the AFDB.
-
-  Note that the values are presented as floats to 1 decimal place,
-  whereas AFDB returns integer values.
-
-  Args:
-    pae: The n_res x n_res PAE array.
-    max_pae: The maximum possible PAE value.
-  Returns:
-    PAE output format as a JSON string.
-  """
-  # Check the PAE array is the correct shape.
-  if (pae.ndim != 2 or pae.shape[0] != pae.shape[1]):
-    raise ValueError(f'PAE must be a square matrix, got {pae.shape}')
-
-  # Round the predicted aligned errors to 1 decimal place.
+  """Returns the PAE in the same format as is used in the AFDB."""
   rounded_errors = np.round(pae.astype(np.float64), decimals=1)
-  formatted_output = [{
-      'predicted_aligned_error': rounded_errors.tolist(),
-      'max_predicted_aligned_error': max_pae
-  }]
-  return json.dumps(formatted_output, indent=None, separators=(',', ':'))
+  indices = np.indices((len(rounded_errors), len(rounded_errors))) + 1
+  indices_1 = indices[0].flatten().tolist()
+  indices_2 = indices[1].flatten().tolist()
+  return json.dumps(
+      [{'residue1': indices_1,
+        'residue2': indices_2,
+        'distance': rounded_errors.flatten().tolist(),
+        'max_predicted_aligned_error': max_pae}],
+      indent=None, separators=(',', ':'))

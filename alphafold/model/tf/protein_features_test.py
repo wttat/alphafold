@@ -27,10 +27,6 @@ def _random_bytes():
 
 class FeaturesTest(parameterized.TestCase, tf.test.TestCase):
 
-  def setUp(self):
-    super().setUp()
-    tf.disable_v2_behavior()
-
   def testFeatureNames(self):
     self.assertEqual(len(protein_features.FEATURE_SIZES),
                      len(protein_features.FEATURE_TYPES))
@@ -51,4 +47,5 @@ class FeaturesTest(parameterized.TestCase, tf.test.TestCase):
 
 
 if __name__ == '__main__':
+  tf.disable_v2_behavior()
   absltest.main()
