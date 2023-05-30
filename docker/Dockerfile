@@ -36,6 +36,7 @@ RUN apt-get update \
     && apt-get clean
 
 # Install awscli & boto3.
+RUN apt-get install python3-pip -y
 RUN pip3 install awscli boto3 --no-cache-dir
 
 # Compile HHsuite from source.
