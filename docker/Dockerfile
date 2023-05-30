@@ -35,10 +35,6 @@ RUN apt-get update \
     && apt-get autoremove -y \
     && apt-get clean
 
-# Install awscli & boto3.
-RUN apt-get install python3-pip -y
-RUN pip3 install awscli boto3 --no-cache-dir
-
 # Compile HHsuite from source.
 RUN git clone --branch v3.3.0 https://github.com/soedinglab/hh-suite.git /tmp/hh-suite \
     && mkdir /tmp/hh-suite/build \
@@ -78,6 +74,9 @@ RUN pip3 install --upgrade pip --no-cache-dir \
       jaxlib==0.3.25+cuda11.cudnn805 \
       -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
+# Install awscli & boto3.
+RUN pip3 install awscli boto3 --no-cache-dir
+
 # Add SETUID bit to the ldconfig binary so that non-root users can run it.
 RUN chmod u+s /sbin/ldconfig.real
 
@@ -87,8 +86,10 @@ RUN chmod u+s /sbin/ldconfig.real
 # ENTRYPOINT does not support easily running multiple commands, so instead we
 # write a shell script to wrap them up.
 WORKDIR /app/alphafold
-RUN echo $'#!/bin/bash\n\
-ldconfig\n\
-python /app/alphafold/run_alphafold.py "$@"' > /app/run_alphafold.sh \
-  && chmod +x /app/run_alphafold.sh
-ENTRYPOINT ["/app/run_alphafold.sh"]
+# RUN echo $'#!/bin/bash\n\
+# ldconfig\n\
+# python /app/alphafold/run_alphafold.py "$@"' > /app/run_alphafold.sh \
+#   && chmod +x /app/run_alphafold.sh
+# ENTRYPOINT ["/app/run_alphafold.sh"]
+COPY run.sh /app/run.sh
+RUN chmod +x /app/run.sh
