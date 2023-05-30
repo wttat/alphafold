@@ -35,6 +35,9 @@ RUN apt-get update \
     && apt-get autoremove -y \
     && apt-get clean
 
+# Install awscli & boto3.
+RUN pip3 install awscli boto3 --no-cache-dir
+
 # Compile HHsuite from source.
 RUN git clone --branch v3.3.0 https://github.com/soedinglab/hh-suite.git /tmp/hh-suite \
     && mkdir /tmp/hh-suite/build \
@@ -55,7 +58,7 @@ RUN wget -q -P /tmp \
 ENV PATH="/opt/conda/bin:$PATH"
 RUN conda install -qy conda==4.13.0 \
     && conda install -y -c conda-forge \
-      openmm=7.5.1 \
+      openmm=7.7.0 \
       cudatoolkit==${CUDA_VERSION} \
       pdbfixer \
       pip \
@@ -73,13 +76,6 @@ RUN pip3 install --upgrade pip --no-cache-dir \
       jax==0.3.25 \
       jaxlib==0.3.25+cuda11.cudnn805 \
       -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
-
-# Install awscli & boto3.
-RUN pip3 install awscli boto3 --no-cache-dir
-
-# Apply OpenMM patch.
-WORKDIR /opt/conda/lib/python3.8/site-packages
-RUN patch -p0 < /app/alphafold/docker/openmm.patch
 
 # Add SETUID bit to the ldconfig binary so that non-root users can run it.
 RUN chmod u+s /sbin/ldconfig.real
