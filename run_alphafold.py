@@ -143,9 +143,6 @@ flags.DEFINE_boolean('use_gpu_relax', None, 'Whether to relax on GPU. '
                      'recommended to enable if possible. GPUs must be available'
                      ' if this setting is enabled.')
 
-
-flags.DEFINE_integer('vcpu', 8, 'vcpu from batch setting')
-
 FLAGS = flags.FLAGS
 
 MAX_TEMPLATE_HITS = 20
@@ -439,8 +436,7 @@ def main(argv):
       template_searcher=template_searcher,
       template_featurizer=template_featurizer,
       use_small_bfd=use_small_bfd,
-      use_precomputed_msas=FLAGS.use_precomputed_msas,
-      vcpu=FLAGS.vcpu
+      use_precomputed_msas=FLAGS.use_precomputed_msas
       )
 
   if run_multimer_system:
