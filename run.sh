@@ -51,6 +51,7 @@ done
 
 echo "BATCH_BUCKET : $BATCH_BUCKET"
 echo "REGION : $REGION"
+echo "fasta : $fasta"
 echo "fasta_paths : $fasta_paths"
 echo "max_template_date : $max_template_date"
 echo "model_preset : $model_preset"
@@ -206,18 +207,17 @@ else
         echo "af2 succeed"
 fi
 
-echo "nothing"
 
 echo "start ziping"
-fasta_name=${fasta_paths%.*}
+result_folder=${fasta_paths%.*}
 
 cd $output_dir
-tar -zcvf $fasta_name.tar.gz $fasta_name/
+tar -zcvf $fasta.tar.gz $result_folder/
 
 echo "start uploading"
-aws s3 sync $output_dir/$fasta_name s3://$BATCH_BUCKET/$OUTPUT_PREFIX/$fasta_name  --region $REGION
+aws s3 sync $output_dir/$result_folder s3://$BATCH_BUCKET/$OUTPUT_PREFIX/$fasta  --region $REGION
 
 # add metadata
-aws s3 cp $output_dir/$fasta_name.tar.gz s3://$BATCH_BUCKET/$OUTPUT_PREFIX/  --metadata {'"id"':'"'$id'"'} --region $REGION
+aws s3 cp $output_dir/$fasta.tar.gz s3://$BATCH_BUCKET/$OUTPUT_PREFIX/  --metadata {'"id"':'"'$id'"'} --region $REGION
 
 echo "all done"
