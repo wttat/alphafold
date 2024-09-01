@@ -165,7 +165,7 @@ kalign_binary_path=$(which kalign)
 
 # download fasta file from S3
 echo "start downloading"
-aws s3 cp s3://$BATCH_BUCKET/$INPUT_PREFIX/$fasta_paths ./ --region $REGION
+aws s3 cp $INPUT_S3_URI ./input.fasta --region $REGION
 
 output_dir="/app/output/"
 
@@ -212,12 +212,12 @@ echo "start ziping"
 result_folder=${fasta_paths%.*}
 
 cd $output_dir
-tar -zcvf $fasta.tar.gz $result_folder/
+tar -zcvf output.tar.gz $result_folder/
 
 echo "start uploading"
-aws s3 sync $output_dir/$result_folder s3://$BATCH_BUCKET/$OUTPUT_PREFIX/$fasta  --region $REGION
+# aws s3 sync $output_dir/$result_folder s3://$BATCH_BUCKET/$OUTPUT_PREFIX/$fasta  --region $REGION
 
 # add metadata
-aws s3 cp $output_dir/$fasta.tar.gz s3://$BATCH_BUCKET/$OUTPUT_PREFIX/  --metadata {'"id"':'"'$id'"'} --region $REGION
+aws s3 cp $output_dir/output.tar.gz $OUTPUT_S3_URI  --metadata {'"id"':'"'$file_id'"'} --region $REGION
 
 echo "all done"
